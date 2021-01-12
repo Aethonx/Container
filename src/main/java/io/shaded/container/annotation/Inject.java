@@ -7,7 +7,7 @@ import java.lang.annotation.RetentionPolicy;
 /**
  * Used to mark which method we are replacing for injection.
  */
-@java.lang.annotation.Target({ ElementType.METHOD })
+@java.lang.annotation.Target({ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Inject {
 
@@ -19,6 +19,6 @@ public @interface Inject {
 	/**
 	 * The injections method description default void method with no arguments.
 	 */
-	public String description() default "()V";
+	public String description();
 
 }

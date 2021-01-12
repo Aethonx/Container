@@ -164,15 +164,15 @@ public final class RedefineClassAgent {
 	}
 
 
-	public static String getClassName(Class cls) {
+	private static String getClassName(Class cls) {
 		return cls.getName().replace(".", "/") + ".class";
 	}
 
-	public static InputStream getStreamAsClass(Class cls) {
+	private static InputStream getStreamAsClass(Class cls) {
 		return ClassLoader.getSystemResourceAsStream(getClassName(cls));
 	}
 
-	public static byte[] getBytesAsStream(InputStream in) throws IOException {
+	private static byte[] getBytesAsStream(InputStream in) throws IOException {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		int read;
 		byte[] data = new byte[65536];
@@ -182,7 +182,7 @@ public final class RedefineClassAgent {
 		return out.toByteArray();
 	}
 
-	public static byte[] getBytesAsClass(Class cls) throws IOException {
+	private static byte[] getBytesAsClass(Class cls) throws IOException {
 		return getBytesAsStream(getStreamAsClass(cls));
 	}
 

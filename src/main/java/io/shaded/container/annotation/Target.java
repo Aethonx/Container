@@ -7,8 +7,8 @@ import java.lang.annotation.RetentionPolicy;
 /**
  * Marker for the class we are modifying.
  */
-@java.lang.annotation.Target(ElementType.ANNOTATION_TYPE)
-@Retention(RetentionPolicy.CLASS)
+@java.lang.annotation.Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
 public @interface Target {
 
 	/**
