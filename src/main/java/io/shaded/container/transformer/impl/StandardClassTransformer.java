@@ -8,7 +8,6 @@ import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.MethodNode;
 
-import java.lang.instrument.ClassDefinition;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -23,11 +22,10 @@ public final class StandardClassTransformer implements ClassTransformer {
 	/*
 	 * Transforms the class to redefine.
 	 */
-	public ClassDefinition transform(InjectionClassNode injectionClassNode) {
+	public byte[] transform(InjectionClassNode injectionClassNode) {
 		try {
 			ClassNode targetClassNode = injectionClassNode.getTargetClassNode();
 			List<InjectionNode> nodes = injectionClassNode.getInjectionTargets();
-
 			for (InjectionNode injectionNode : nodes) {
 				MethodNode methodNode = this.getMethodNode(targetClassNode, injectionNode);
 				if (methodNode == null) {
@@ -38,14 +36,9 @@ public final class StandardClassTransformer implements ClassTransformer {
 				methodNode.instructions = injectionNode.getMethod().instructions;
 				targetClassNode.methods.set(methodIndex, methodNode); // Apply the swap.
 			}
-
 			ClassWriter classWriter = new ClassWriter(ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
 			targetClassNode.accept(classWriter);
-
-			byte[] classBytes = classWriter.toByteArray();
-			Class<?> klass = Class.forName(targetClassNode.name.replaceAll("/", "."));
-
-			return new ClassDefinition(klass, classBytes);
+			return classWriter.toByteArray();
 		} catch (Exception exception) {
 			exception.printStackTrace();
 		}

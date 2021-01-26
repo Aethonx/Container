@@ -8,7 +8,8 @@ import io.shaded.container.parser.impl.StandardClassParser;
 import io.shaded.container.transformer.ClassTransformer;
 import io.shaded.container.transformer.impl.StandardClassTransformer;
 
-import java.lang.instrument.ClassDefinition;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Logger;
 
 public final class ContainerImpl implements Container {
@@ -23,12 +24,18 @@ public final class ContainerImpl implements Container {
 	 */
 	private static final transient Container instance = new ContainerImpl();
 
+	/**
+	 * Map of injection class to there node.
+	 */
+	private final Map<Class<?>, InjectionClassNode> injections;
+
 	private final ClassParser parser;
 	private final ClassTransformer transformer;
 
 	public ContainerImpl() {
-		parser = new StandardClassParser();
-		transformer = new StandardClassTransformer();
+		this.parser = new StandardClassParser();
+		this.transformer = new StandardClassTransformer();
+		this.injections = new HashMap<>();
 	}
 
 	@Override
@@ -36,11 +43,11 @@ public final class ContainerImpl implements Container {
 		try {
 			for (Class<?> klass : classes) {
 				InjectionClassNode injectionClassNode = new InjectionClassNode(klass);
-				ClassTransformer transformer = this.getClassTransformer();
-				ClassDefinition definition = transformer.transform(injectionClassNode);
-				RedefineClassAgent.redefineClasses(definition);
+				Class<?> reload = Class.forName(injectionClassNode.getTargetClassNode().name.replace("/", "."));
+				this.injections.put(reload, injectionClassNode);
+				RedefineClassAgent.redefineClasses(reload);
 			}
-		}catch (Exception exception){
+		} catch (Exception exception) {
 			exception.printStackTrace();
 		}
 	}
@@ -59,4 +66,7 @@ public final class ContainerImpl implements Container {
 		return instance;
 	}
 
+	public Map<Class<?>, InjectionClassNode> getInjections() {
+		return injections;
+	}
 }

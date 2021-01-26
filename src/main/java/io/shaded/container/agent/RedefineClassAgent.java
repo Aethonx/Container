@@ -1,6 +1,7 @@
 package io.shaded.container.agent;
 
 import com.sun.tools.attach.VirtualMachine;
+import io.shaded.container.reload.ClassReloadHook;
 
 import java.io.*;
 import java.lang.instrument.ClassDefinition;
@@ -53,8 +54,8 @@ public final class RedefineClassAgent {
 			LOGGER.severe("Class redefinition not supported. Aborting.");
 			return;
 		}
-
 		instrumentation = inst;
+		instrumentation.addTransformer(new ClassReloadHook(), true);
 	}
 
 	/**
@@ -74,6 +75,16 @@ public final class RedefineClassAgent {
 			throws UnmodifiableClassException, ClassNotFoundException, FailedToLoadAgentException {
 		ensureAgentLoaded();
 		instrumentation.redefineClasses(definitions);
+	}
+
+	/**
+	 * Attemps to define out classes
+	 *
+	 * @param classes to try to redefine classes.
+	 */
+	public static void redefineClasses(Class<?>... classes) throws FailedToLoadAgentException, UnmodifiableClassException {
+		ensureAgentLoaded();
+		instrumentation.retransformClasses(classes);
 	}
 
 	/**
@@ -150,10 +161,13 @@ public final class RedefineClassAgent {
 			// add the agent .class into the .jar
 			JarEntry agent = new JarEntry(RedefineClassAgent.class.getName().replace('.', '/') + ".class");
 			jos.putNextEntry(agent);
-
-			// dump the class bytecode into the entry
 			jos.write(getBytesAsClass(RedefineClassAgent.class));
 			jos.closeEntry();
+			JarEntry classHook = new JarEntry(ClassReloadHook.class.getName().replace('.', '/') + ".class");
+			jos.putNextEntry(classHook);
+			jos.write(getBytesAsClass(ClassReloadHook.class));
+			jos.closeEntry();
+			// dump the class bytecode into the entry
 		} catch (Exception e) {
 			// Realistically this should never happen.
 			LOGGER.log(Level.SEVERE, "Exception while creating RedefineClassAgent jar.", e);

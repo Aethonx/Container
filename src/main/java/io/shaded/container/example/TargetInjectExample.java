@@ -6,4 +6,9 @@ public class TargetInjectExample {
 		System.out.println("init");
 	}
 
+	static class FuckYou {
+		public FuckYou() {
+		}
+	}
+
 }
